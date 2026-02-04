@@ -192,6 +192,16 @@
       background: rgba(248, 113, 113, 0.5);
     }
 
+    .skip-btn {
+      color: #fff;
+      background: rgba(148, 163, 184, 0.3);
+      border: 1px solid #94a3b8;
+    }
+
+    .skip-btn:hover {
+      background: rgba(148, 163, 184, 0.5);
+    }
+
     .empty-state {
       text-align: center;
       padding: 60px 20px;
@@ -422,6 +432,7 @@
         actions = `
           <button class="action-btn save-btn" onclick="saveProject('${id}')">Save for Later</button>
           <button class="action-btn complete-btn" onclick="completeProject('${id}', 'open')">Mark Complete</button>
+          <button class="action-btn skip-btn" onclick="replaceProject('${id}')">Skip</button>
         `;
       } else if (listType === 'saved') {
         actions = `
@@ -557,6 +568,28 @@
       completedProjects = completedProjects.filter(p => createIdeaId(p) !== id);
       saveToStorage();
       renderCurrentTab();
+    }
+
+    function replaceProject(id) {
+      const currentIds = openProjects.map(p => createIdeaId(p));
+      const savedIds = savedProjects.map(p => createIdeaId(p));
+      const completedIds = completedProjects.map(p => createIdeaId(p));
+      const excludedIds = [...currentIds, ...savedIds, ...completedIds];
+
+      const available = projectIdeas.filter(p => !excludedIds.includes(createIdeaId(p)));
+
+      if (available.length === 0) {
+        alert('No more project ideas available!');
+        return;
+      }
+
+      const newProject = available[Math.floor(Math.random() * available.length)];
+      const index = openProjects.findIndex(p => createIdeaId(p) === id);
+
+      if (index !== -1) {
+        openProjects[index] = newProject;
+        renderCurrentTab();
+      }
     }
 
     // Initialize
