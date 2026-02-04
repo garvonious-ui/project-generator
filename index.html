@@ -432,7 +432,7 @@
         actions = `
           <button class="action-btn save-btn" onclick="saveProject('${id}')">Save for Later</button>
           <button class="action-btn complete-btn" onclick="completeProject('${id}', 'open')">Mark Complete</button>
-          <button class="action-btn skip-btn" onclick="replaceProject('${id}')">Skip</button>
+          <button class="action-btn skip-btn" onclick="skipProject('${id}')">Skip</button>
         `;
       } else if (listType === 'saved') {
         actions = `
@@ -570,26 +570,9 @@
       renderCurrentTab();
     }
 
-    function replaceProject(id) {
-      const currentIds = openProjects.map(p => createIdeaId(p));
-      const savedIds = savedProjects.map(p => createIdeaId(p));
-      const completedIds = completedProjects.map(p => createIdeaId(p));
-      const excludedIds = [...currentIds, ...savedIds, ...completedIds];
-
-      const available = projectIdeas.filter(p => !excludedIds.includes(createIdeaId(p)));
-
-      if (available.length === 0) {
-        alert('No more project ideas available!');
-        return;
-      }
-
-      const newProject = available[Math.floor(Math.random() * available.length)];
-      const index = openProjects.findIndex(p => createIdeaId(p) === id);
-
-      if (index !== -1) {
-        openProjects[index] = newProject;
-        renderCurrentTab();
-      }
+    function skipProject(id) {
+      openProjects = openProjects.filter(p => createIdeaId(p) !== id);
+      renderCurrentTab();
     }
 
     // Initialize
