@@ -1315,10 +1315,12 @@
     let openProjects = [];
     let savedProjects = JSON.parse(localStorage.getItem('savedProjects') || '[]');
     let completedProjects = JSON.parse(localStorage.getItem('completedProjects') || '[]');
+    let skippedIds = JSON.parse(localStorage.getItem('skippedIds') || '[]');
 
     function saveToStorage() {
       localStorage.setItem('savedProjects', JSON.stringify(savedProjects));
       localStorage.setItem('completedProjects', JSON.stringify(completedProjects));
+      localStorage.setItem('skippedIds', JSON.stringify(skippedIds));
     }
 
     function updateCounts() {
@@ -1440,7 +1442,37 @@
     }
 
     function generateIdeas() {
-      openProjects = shuffleArray(projectIdeas).slice(0, 3);
+      const savedIds = savedProjects.map(p => createIdeaId(p));
+      const completedIds = completedProjects.map(p => createIdeaId(p));
+      const excludedIds = [...savedIds, ...completedIds];
+
+      // Get available projects (not saved or completed)
+      const available = projectIdeas.filter(p => !excludedIds.includes(createIdeaId(p)));
+
+      // Prioritize non-skipped projects
+      const nonSkipped = available.filter(p => !skippedIds.includes(createIdeaId(p)));
+
+      let selected;
+      if (nonSkipped.length >= 3) {
+        selected = shuffleArray(nonSkipped).slice(0, 3);
+      } else if (nonSkipped.length > 0) {
+        // Use all non-skipped plus some skipped to fill
+        const needed = 3 - nonSkipped.length;
+        const skippedAvailable = available.filter(p => skippedIds.includes(createIdeaId(p)));
+        selected = [...nonSkipped, ...shuffleArray(skippedAvailable).slice(0, needed)];
+        // Reset skipped list since we're cycling back
+        skippedIds = [];
+        saveToStorage();
+      } else if (available.length > 0) {
+        // All have been skipped, reset and start over
+        skippedIds = [];
+        saveToStorage();
+        selected = shuffleArray(available).slice(0, 3);
+      } else {
+        selected = [];
+      }
+
+      openProjects = selected;
       currentTab = 'open';
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelector('[data-tab="open"]').classList.add('active');
@@ -1491,6 +1523,10 @@
     }
 
     function skipProject(id) {
+      if (!skippedIds.includes(id)) {
+        skippedIds.push(id);
+        saveToStorage();
+      }
       openProjects = openProjects.filter(p => createIdeaId(p) !== id);
       renderCurrentTab();
     }
