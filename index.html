@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Project Idea Generator</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #e0e0e0;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      background: linear-gradient(90deg, #00d9ff, #a855f7);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: #888;
+      font-size: 1.1rem;
+    }
+
+    .generate-btn {
+      display: block;
+      margin: 0 auto 24px;
+      padding: 16px 48px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(90deg, #00d9ff, #a855f7);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .generate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 40px rgba(168, 85, 247, 0.3);
+    }
+
+    .generate-btn:active {
+      transform: translateY(0);
+    }
+
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 32px;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 500;
+      color: #888;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 30px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tab:hover {
+      color: #e0e0e0;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .tab.active {
+      color: #fff;
+      background: rgba(0, 217, 255, 0.2);
+      border-color: #00d9ff;
+    }
+
+    .tab .count {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 2px 8px;
+      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+    }
+
+    .tab.active .count {
+      background: rgba(0, 217, 255, 0.3);
+    }
+
+    .ideas-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .idea-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 24px;
+      animation: fadeIn 0.5s ease-out;
+    }
+
+    .idea-card:nth-child(2) { animation-delay: 0.1s; }
+    .idea-card:nth-child(3) { animation-delay: 0.2s; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .idea-card p {
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    .idea-card strong {
+      color: #00d9ff;
+    }
+
+    .complexity-simple { color: #4ade80; }
+    .complexity-medium { color: #fbbf24; }
+    .complexity-hard { color: #f87171; }
+
+    .card-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .action-btn {
+      padding: 10px 20px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .save-btn {
+      color: #fff;
+      background: rgba(168, 85, 247, 0.3);
+      border: 1px solid #a855f7;
+    }
+
+    .save-btn:hover {
+      background: rgba(168, 85, 247, 0.5);
+    }
+
+    .complete-btn {
+      color: #fff;
+      background: rgba(74, 222, 128, 0.3);
+      border: 1px solid #4ade80;
+    }
+
+    .complete-btn:hover {
+      background: rgba(74, 222, 128, 0.5);
+    }
+
+    .remove-btn {
+      color: #fff;
+      background: rgba(248, 113, 113, 0.3);
+      border: 1px solid #f87171;
+    }
+
+    .remove-btn:hover {
+      background: rgba(248, 113, 113, 0.5);
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #666;
+    }
+
+    .empty-state p {
+      font-size: 1.1rem;
+      margin-bottom: 8px;
+    }
+
+    .empty-state .hint {
+      font-size: 0.9rem;
+      color: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Project Idea Generator</h1>
+      <p class="subtitle">Get inspired for your next vibe coding session</p>
+    </header>
+
+    <button class="generate-btn" onclick="generateIdeas()">Generate Ideas</button>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="open" onclick="switchTab('open')">
+        Open <span class="count" id="open-count">0</span>
+      </button>
+      <button class="tab" data-tab="saved" onclick="switchTab('saved')">
+        Saved <span class="count" id="saved-count">0</span>
+      </button>
+      <button class="tab" data-tab="completed" onclick="switchTab('completed')">
+        Completed <span class="count" id="completed-count">0</span>
+      </button>
+    </div>
+
+    <div class="ideas-container" id="ideas"></div>
+  </div>
+
+  <script>
+    const projectIdeas = [
+      {
+        name: "Mood Playlist Curator",
+        oneLiner: "Users select their current mood from a visual picker, and the app generates a Spotify playlist by fetching tracks that match that energy level and vibe",
+        complexity: "Medium",
+        ingredients: ["HTML/CSS", "JavaScript", "Spotify API", "Local Storage"],
+        time: "4-6 hours",
+        whyGood: "API integration and OAuth authentication flow"
+      },
+      {
+        name: "Screenshot to Code",
+        oneLiner: "Upload a screenshot of any UI design, and the app uses AI vision to analyze the layout, colors, and components, then generates clean HTML/CSS code you can copy",
+        complexity: "Hard",
+        ingredients: ["React", "OpenAI Vision API", "Tailwind CSS"],
+        time: "8-12 hours",
+        whyGood: "Working with AI APIs and prompt engineering"
+      },
+      {
+        name: "Daily Standup Bot",
+        oneLiner: "A Slack bot that DMs team members at a scheduled time asking what they did yesterday, what they're doing today, and any blockers, then posts a summary to a channel",
+        complexity: "Medium",
+        ingredients: ["Node.js", "Slack API", "SQLite", "Cron jobs"],
+        time: "5-7 hours",
+        whyGood: "Building bots and scheduled task automation"
+      },
+      {
+        name: "Pomodoro Forest",
+        oneLiner: "A 25-minute focus timer where completing each session plants a tree on a canvas. Skip or quit early and the tree dies. Watch your forest grow over days of productive work",
+        complexity: "Simple",
+        ingredients: ["HTML Canvas", "CSS", "Vanilla JavaScript"],
+        time: "3-4 hours",
+        whyGood: "Canvas animations and state management"
+      },
+      {
+        name: "Git Commit Art",
+        oneLiner: "A CLI tool that backdates empty commits to specific days, letting you draw pixel art patterns in your GitHub contribution graph by targeting the right dates",
+        complexity: "Simple",
+        ingredients: ["Python", "Git", "CLI tools"],
+        time: "2-3 hours",
+        whyGood: "Scripting and understanding Git internals"
+      },
+      {
+        name: "Recipe Remix",
+        oneLiner: "Enter the ingredients you have in your fridge, and AI suggests creative recipe variations you can make, adjusting for dietary restrictions and cuisine preferences",
+        complexity: "Medium",
+        ingredients: ["Next.js", "OpenAI API", "Supabase"],
+        time: "6-8 hours",
+        whyGood: "Full-stack development with AI integration"
+      },
+      {
+        name: "Bookmark Time Capsule",
+        oneLiner: "A browser extension that randomly surfaces one of your forgotten bookmarks each day as a notification, helping you rediscover articles and sites you saved but never read",
+        complexity: "Simple",
+        ingredients: ["Browser Extension API", "JavaScript", "Chrome Storage"],
+        time: "3-4 hours",
+        whyGood: "Browser extension development basics"
+      },
+      {
+        name: "CLI Task Fighter",
+        oneLiner: "A terminal-based todo app where completing tasks earns XP and levels up your character. Overdue tasks spawn enemy encounters you must defeat by finishing the work",
+        complexity: "Medium",
+        ingredients: ["Node.js", "Ink (React for CLI)", "SQLite"],
+        time: "5-6 hours",
+        whyGood: "Building interactive CLI applications"
+      },
+      {
+        name: "Color Palette Thief",
+        oneLiner: "Paste any image URL and the app extracts the 5-8 most dominant colors, displaying them as a palette with hex codes you can copy for your own design projects",
+        complexity: "Simple",
+        ingredients: ["HTML Canvas", "JavaScript", "Color algorithms"],
+        time: "2-3 hours",
+        whyGood: "Image processing and color theory"
+      },
+      {
+        name: "Markdown Mind Map",
+        oneLiner: "Paste or upload a markdown file with nested headers and bullet points, and the app renders it as an interactive, zoomable mind map with collapsible branches",
+        complexity: "Medium",
+        ingredients: ["D3.js", "Markdown parser", "SVG"],
+        time: "5-7 hours",
+        whyGood: "Data visualization and tree structures"
+      },
+      {
+        name: "Expense Splitter",
+        oneLiner: "Enter group expenses from a trip or dinner, and the app calculates the minimum number of transactions needed so everyone pays their fair share with no circular payments",
+        complexity: "Simple",
+        ingredients: ["React", "Algorithm design", "Local Storage"],
+        time: "3-4 hours",
+        whyGood: "Algorithm implementation and UI state"
+      },
+      {
+        name: "API Status Dashboard",
+        oneLiner: "Configure a list of API endpoints to monitor, and the dashboard pings them at intervals showing uptime, response times, and instant alerts when something goes down",
+        complexity: "Medium",
+        ingredients: ["Vue.js", "WebSockets", "Node.js", "Redis"],
+        time: "6-8 hours",
+        whyGood: "Real-time updates and monitoring systems"
+      },
+      {
+        name: "Typewriter Effect Generator",
+        oneLiner: "Type or paste text, customize the typing speed and cursor style, then export the animation as a GIF or embed code for your portfolio or social media posts",
+        complexity: "Simple",
+        ingredients: ["HTML/CSS", "JavaScript", "GIF encoder"],
+        time: "2-3 hours",
+        whyGood: "Animation timing and media generation"
+      },
+      {
+        name: "Local LLM Chat",
+        oneLiner: "A desktop app that connects to Ollama or other local AI models, providing a clean chat interface with conversation history, all running privately on your machine",
+        complexity: "Hard",
+        ingredients: ["Electron", "Ollama", "React", "SQLite"],
+        time: "10-15 hours",
+        whyGood: "Desktop app development and local AI"
+      },
+      {
+        name: "Regex Playground",
+        oneLiner: "Type a regex pattern and test string, and the app highlights matches in real-time while showing a plain-English explanation of what each part of your pattern does",
+        complexity: "Medium",
+        ingredients: ["React", "Regex engine", "Syntax highlighting"],
+        time: "4-6 hours",
+        whyGood: "Parsing and educational tool design"
+      },
+      {
+        name: "Habit Streak Tracker",
+        oneLiner: "Define daily habits you want to build, check them off each day, and watch streak counts grow with a GitHub-style contribution grid showing your consistency over time",
+        complexity: "Simple",
+        ingredients: ["Svelte", "Local Storage", "CSS Grid"],
+        time: "3-4 hours",
+        whyGood: "State persistence and data visualization"
+      },
+      {
+        name: "Meeting Cost Calculator",
+        oneLiner: "Enter attendee count and average salary, start the timer when a meeting begins, and watch the running cost tick up in real-time to encourage shorter, focused meetings",
+        complexity: "Simple",
+        ingredients: ["HTML/CSS", "JavaScript", "Timer logic"],
+        time: "1-2 hours",
+        whyGood: "Quick wins and practical utility apps"
+      },
+      {
+        name: "Font Pairing Tool",
+        oneLiner: "Browse curated font combinations from Google Fonts, preview them with your own sample text, and get the CSS import code ready to paste into your project",
+        complexity: "Medium",
+        ingredients: ["Google Fonts API", "React", "CSS Variables"],
+        time: "4-5 hours",
+        whyGood: "Typography and design system thinking"
+      }
+    ];
+
+    let currentTab = 'open';
+    let openProjects = [];
+    let savedProjects = JSON.parse(localStorage.getItem('savedProjects') || '[]');
+    let completedProjects = JSON.parse(localStorage.getItem('completedProjects') || '[]');
+
+    function saveToStorage() {
+      localStorage.setItem('savedProjects', JSON.stringify(savedProjects));
+      localStorage.setItem('completedProjects', JSON.stringify(completedProjects));
+    }
+
+    function updateCounts() {
+      document.getElementById('open-count').textContent = openProjects.length;
+      document.getElementById('saved-count').textContent = savedProjects.length;
+      document.getElementById('completed-count').textContent = completedProjects.length;
+    }
+
+    function shuffleArray(array) {
+      const shuffled = [...array];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      return shuffled;
+    }
+
+    function getComplexityClass(complexity) {
+      return `complexity-${complexity.toLowerCase()}`;
+    }
+
+    function createIdeaId(idea) {
+      return idea.name.toLowerCase().replace(/\s+/g, '-');
+    }
+
+    function renderCard(idea, listType) {
+      const id = createIdeaId(idea);
+      let actions = '';
+
+      if (listType === 'open') {
+        actions = `
+          <button class="action-btn save-btn" onclick="saveProject('${id}')">Save for Later</button>
+          <button class="action-btn complete-btn" onclick="completeProject('${id}', 'open')">Mark Complete</button>
+        `;
+      } else if (listType === 'saved') {
+        actions = `
+          <button class="action-btn complete-btn" onclick="completeProject('${id}', 'saved')">Mark Complete</button>
+          <button class="action-btn remove-btn" onclick="removeFromSaved('${id}')">Remove</button>
+        `;
+      } else if (listType === 'completed') {
+        actions = `
+          <button class="action-btn remove-btn" onclick="removeFromCompleted('${id}')">Remove</button>
+        `;
+      }
+
+      return `
+        <div class="idea-card" data-id="${id}">
+          <p><strong>Project Name:</strong> ${idea.name}</p>
+          <p><strong>One-liner:</strong> ${idea.oneLiner}</p>
+          <p><strong>Complexity:</strong> <span class="${getComplexityClass(idea.complexity)}">${idea.complexity}</span></p>
+          <p><strong>Ingredients needed:</strong> ${idea.ingredients.join(', ')}</p>
+          <p><strong>Time estimate:</strong> ${idea.time}</p>
+          <p><strong>Why it's good practice:</strong> ${idea.whyGood}</p>
+          <div class="card-actions">
+            ${actions}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderEmptyState(message, hint) {
+      return `
+        <div class="empty-state">
+          <p>${message}</p>
+          <p class="hint">${hint}</p>
+        </div>
+      `;
+    }
+
+    function renderCurrentTab() {
+      const container = document.getElementById('ideas');
+      let projects, listType;
+
+      if (currentTab === 'open') {
+        projects = openProjects;
+        listType = 'open';
+        if (projects.length === 0) {
+          container.innerHTML = renderEmptyState(
+            'No open projects yet',
+            'Click "Generate Ideas" to get some project suggestions!'
+          );
+          updateCounts();
+          return;
+        }
+      } else if (currentTab === 'saved') {
+        projects = savedProjects;
+        listType = 'saved';
+        if (projects.length === 0) {
+          container.innerHTML = renderEmptyState(
+            'No saved projects',
+            'Save projects from the Open tab to work on later'
+          );
+          updateCounts();
+          return;
+        }
+      } else {
+        projects = completedProjects;
+        listType = 'completed';
+        if (projects.length === 0) {
+          container.innerHTML = renderEmptyState(
+            'No completed projects yet',
+            'Mark projects as complete to track your progress!'
+          );
+          updateCounts();
+          return;
+        }
+      }
+
+      container.innerHTML = projects.map(idea => renderCard(idea, listType)).join('');
+      updateCounts();
+    }
+
+    function switchTab(tab) {
+      currentTab = tab;
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+      renderCurrentTab();
+    }
+
+    function generateIdeas() {
+      openProjects = shuffleArray(projectIdeas).slice(0, 3);
+      currentTab = 'open';
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelector('[data-tab="open"]').classList.add('active');
+      renderCurrentTab();
+    }
+
+    function findProjectById(id, list) {
+      return list.find(p => createIdeaId(p) === id);
+    }
+
+    function saveProject(id) {
+      const project = findProjectById(id, openProjects);
+      if (project && !savedProjects.some(p => createIdeaId(p) === id)) {
+        savedProjects.push(project);
+        openProjects = openProjects.filter(p => createIdeaId(p) !== id);
+        saveToStorage();
+        renderCurrentTab();
+      }
+    }
+
+    function completeProject(id, fromList) {
+      let project;
+      if (fromList === 'open') {
+        project = findProjectById(id, openProjects);
+        openProjects = openProjects.filter(p => createIdeaId(p) !== id);
+      } else {
+        project = findProjectById(id, savedProjects);
+        savedProjects = savedProjects.filter(p => createIdeaId(p) !== id);
+      }
+
+      if (project && !completedProjects.some(p => createIdeaId(p) === id)) {
+        completedProjects.push(project);
+        saveToStorage();
+        renderCurrentTab();
+      }
+    }
+
+    function removeFromSaved(id) {
+      savedProjects = savedProjects.filter(p => createIdeaId(p) !== id);
+      saveToStorage();
+      renderCurrentTab();
+    }
+
+    function removeFromCompleted(id) {
+      completedProjects = completedProjects.filter(p => createIdeaId(p) !== id);
+      saveToStorage();
+      renderCurrentTab();
+    }
+
+    // Initialize
+    updateCounts();
+    renderCurrentTab();
+  </script>
+</body>
+</html>
